@@ -1,0 +1,18 @@
+// app/owner/reports/[id].tsx
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import TransactionDetailView from '../../../pages/TransactionDetailView';
+
+export default function OwnerTransactionDetail() {
+  const { id } = useLocalSearchParams();
+  const router = useRouter();
+
+  if (!id) return null;
+
+  return (
+    <TransactionDetailView 
+      transactionId={id as string} 
+      onBack={() => router.back()} 
+      role="owner"
+    />
+  );
+}
