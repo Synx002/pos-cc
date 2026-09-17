@@ -46,11 +46,11 @@ export default function OwnerSettingsScreen() {
         },
         {
           label: 'Tentang Aplikasi',
-          description: 'Versi 1.0.0 • Selasar Kafe POS',
+          description: 'Versi 1.0.0 • cici POS',
           icon: 'info',
           color: '#9e9e9e',
           onPress: () =>
-            Alert.alert('Selasar Kafe POS', 'Versi 1.0.0\n© 2026 Selasar Kafe'),
+            Alert.alert('cici POS', 'Versi 1.0.0\n© 2026 cici'),
         },
       ],
     },

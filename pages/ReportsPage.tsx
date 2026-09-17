@@ -99,8 +99,8 @@ export default function ReportsPage({ role }: ReportsPageProps) {
 
       switch (activePeriod) {
         case 'today': fromDate = startOfDay(now); break;
-        case '7d':   fromDate = startOfDay(subDays(now, 7)); break;
-        case '30d':  fromDate = startOfDay(subDays(now, 30)); break;
+        case '7d': fromDate = startOfDay(subDays(now, 7)); break;
+        case '30d': fromDate = startOfDay(subDays(now, 30)); break;
       }
 
       const { data, error } = await supabase
@@ -206,7 +206,7 @@ export default function ReportsPage({ role }: ReportsPageProps) {
       <body>
         <div class="cover">
           <h1>Laporan Keuangan</h1>
-          <p>Selasar Kafe &nbsp;•&nbsp; Digenerate: ${generatedAt}</p>
+          <p>Cici &nbsp;•&nbsp; Digenerate: ${generatedAt}</p>
           <div class="badge">Periode: ${periodText}</div>
         </div>
         <div class="content">
@@ -232,7 +232,7 @@ export default function ReportsPage({ role }: ReportsPageProps) {
             </thead>
             <tbody>${txRows || '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:20px">Tidak ada transaksi</td></tr>'}</tbody>
           </table>
-          <div class="footer">Laporan ini dibuat secara otomatis oleh sistem Selasar Kafe &nbsp;•&nbsp; ${generatedAt}</div>
+          <div class="footer">Laporan ini dibuat secara otomatis oleh sistem Cici &nbsp;•&nbsp; ${generatedAt}</div>
         </div>
       </body>
       </html>`;
@@ -263,7 +263,7 @@ export default function ReportsPage({ role }: ReportsPageProps) {
       const activePeriod = isOwner ? period : 'today';
 
       const summaryData = [
-        ['LAPORAN KEUANGAN — SELASAR KAFE'],
+        ['LAPORAN KEUANGAN — CICI'],
         [`Periode: ${periodLabels[activePeriod]}`],
         [`Digenerate: ${format(new Date(), 'dd MMMM yyyy HH:mm', { locale: idLocale })}`],
         [],
@@ -436,11 +436,11 @@ export default function ReportsPage({ role }: ReportsPageProps) {
               {rawTransactions.length > 0 ? (
                 rawTransactions.map((t, i) => {
                   const total = t.grand_total ?? t.subtotal;
-                  const detailPath = isOwner ? `/owner/reports/${t.transaction_id}` : 
-                                    (role === 'cashier' ? `/cashier/history` : `/storeman/history`);
+                  const detailPath = isOwner ? `/owner/reports/${t.transaction_id}` :
+                    (role === 'cashier' ? `/cashier/history` : `/storeman/history`);
                   return (
-                    <TouchableOpacity 
-                      key={t.transaction_id} 
+                    <TouchableOpacity
+                      key={t.transaction_id}
                       onPress={() => router.push(detailPath as any)}
                       activeOpacity={0.7}
                       style={[s.tableRow, i % 2 === 1 && s.tableRowAlt]}

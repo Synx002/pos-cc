@@ -170,8 +170,8 @@ export default function ReceiptScreen() {
             <View style={s.checkCircle}>
               <MaterialIcons name="check" size={28} color="#059669" />
             </View>
-            <Text style={s.cafeName}>{storeInfo?.store_name ?? 'Selasar Kafe'}</Text>
-            <Text style={s.cafeAddr}>{storeInfo?.store_address ?? 'Jl. Raya No. 123, Bandung'}</Text>
+            <Text style={s.cafeName}>{storeInfo?.store_name ?? 'Cici'}</Text>
+            <Text style={s.cafeAddr}>{storeInfo?.store_address ?? 'Jl. Kaliwidas no 2'}</Text>
             <Text style={s.dateText}>{dateStr}</Text>
           </View>
 
@@ -250,7 +250,7 @@ export default function ReceiptScreen() {
           <MaterialIcons name="add" size={20} color={ACCENT} />
           <Text style={s.newBtnText}>Transaksi Baru</Text>
         </TouchableOpacity>
-        
+
         {/* Print */}
         <TouchableOpacity
           style={[s.printBtn, printing && { opacity: 0.7 }]}
@@ -278,19 +278,19 @@ const s = StyleSheet.create({
     width: 64, height: 64, borderRadius: 20, backgroundColor: '#FDF2F4',
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  loadingText:  { fontSize: 14, color: '#9CA3AF', fontWeight: '500' },
+  loadingText: { fontSize: 14, color: '#9CA3AF', fontWeight: '500' },
   notFoundText: { fontSize: 15, color: '#6B7280', fontWeight: '600' },
   header: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingTop: Platform.OS === 'ios' ? 56 : 16,
-  paddingBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 56 : 16,
+    paddingBottom: 14,
 
   },
   backBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,  
+    gap: 6,
   },
   backBtnText: {
     fontSize: 14,
@@ -315,7 +315,7 @@ const s = StyleSheet.create({
     pointerEvents: 'none',
   },
 
-  scroll:        { flex: 1 },
+  scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 8 },
 
   // Receipt card
@@ -337,16 +337,16 @@ const s = StyleSheet.create({
   },
   cafeName: { fontSize: 18, fontWeight: '800', color: '#111827', letterSpacing: -0.3 },
   cafeAddr: { fontSize: 11, color: '#9CA3AF', marginTop: 4 },
-  dateText:  { fontSize: 10, color: '#C4C9D4', marginTop: 5 },
+  dateText: { fontSize: 10, color: '#C4C9D4', marginTop: 5 },
 
   // Meta row
   metaRow: {
     flexDirection: 'row', backgroundColor: '#F9FAFB',
     paddingVertical: 14, paddingHorizontal: 16,
   },
-  metaItem:    { flex: 1, alignItems: 'center' },
-  metaLabel:   { fontSize: 9, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: '600' },
-  metaValue:   { fontSize: 12, fontWeight: '800', color: '#111827', marginTop: 4 },
+  metaItem: { flex: 1, alignItems: 'center' },
+  metaLabel: { fontSize: 9, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: '600' },
+  metaValue: { fontSize: 12, fontWeight: '800', color: '#111827', marginTop: 4 },
   metaDivider: { width: 1, backgroundColor: '#EEEEEE' },
 
   // Dashed line
@@ -364,8 +364,8 @@ const s = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
     paddingVertical: 10, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
   },
-  itemName:  { fontSize: 13, fontWeight: '600', color: '#374151' },
-  itemQty:   { fontSize: 11, color: '#6B7280', marginTop: 2 },
+  itemName: { fontSize: 13, fontWeight: '600', color: '#374151' },
+  itemQty: { fontSize: 11, color: '#6B7280', marginTop: 2 },
   itemTotal: { fontSize: 13, fontWeight: '700', color: '#374151' },
 
   // Summary
@@ -394,7 +394,7 @@ const s = StyleSheet.create({
   // Footer
   receiptFooter: { alignItems: 'center', padding: 20, backgroundColor: '#F9FAFB' },
   footerThanks: { fontSize: 13, fontWeight: '700', color: '#111827', marginBottom: 4 },
-  footerSub:    { fontSize: 11, color: '#9CA3AF', fontStyle: 'italic' },
+  footerSub: { fontSize: 11, color: '#9CA3AF', fontStyle: 'italic' },
 
   // Action buttons
   actions: {
@@ -411,5 +411,5 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: ACCENT, borderRadius: 16, paddingVertical: 14,
     backgroundColor: ACCENT_LIGHT,
   },
-  newBtnText: { fontSize: 14, fontWeight: '700', color:ACCENT },
+  newBtnText: { fontSize: 14, fontWeight: '700', color: ACCENT },
 });

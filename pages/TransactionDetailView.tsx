@@ -116,8 +116,8 @@ export default function TransactionDetailView({ transactionId, onBack, role = 'c
             <View style={s.checkCircle}>
               <MaterialIcons name="check" size={28} color="#059669" />
             </View>
-            <Text style={s.cafeName}>{storeInfo?.store_name ?? 'Selasar Kafe'}</Text>
-            <Text style={s.cafeAddr}>{storeInfo?.store_address ?? 'Jl. Raya No. 123, Bandung'}</Text>
+            <Text style={s.cafeName}>{storeInfo?.store_name ?? 'Cicis'}</Text>
+            <Text style={s.cafeAddr}>{storeInfo?.store_address ?? 'Jl. Kaliwidas no 2'}</Text>
             <Text style={s.dateText}>{dateStr}</Text>
           </View>
 

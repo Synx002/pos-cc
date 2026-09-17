@@ -88,7 +88,7 @@ export default function StoreInfoScreen() {
           <Text style={s.label}>Nama Toko</Text>
           <TextInput
             style={s.input}
-            placeholder="Contoh: Selasar Kafe"
+            placeholder="Contoh: Cici"
             placeholderTextColor="#9CA3AF"
             value={form.store_name}
             onChangeText={(t) => setForm((p) => ({ ...p, store_name: t }))}
