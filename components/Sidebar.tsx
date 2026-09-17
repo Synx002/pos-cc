@@ -119,8 +119,8 @@ export default function Sidebar({
 
           <View>
             {/* ── Brand ── */}
-            <View 
-              style={{ paddingHorizontal: open ? 16 : 0, alignItems: 'center' }} 
+            <View
+              style={{ paddingHorizontal: open ? 16 : 0, alignItems: 'center' }}
               className="mb-7"
             >
               <View
@@ -135,8 +135,8 @@ export default function Sidebar({
               </View>
               {open && (
                 <>
-                  <Text className="text-lg font-bold text-gray-900">Selasar</Text>
-                  <Text className="text-xs text-gray-400 tracking-widest">Kafe POS</Text>
+                  <Text className="text-lg font-bold text-gray-900">cici</Text>
+                  <Text className="text-xs text-gray-400 tracking-widest">point of sales</Text>
                   <View
                     className="h-0.5 w-10 rounded-full mt-2.5 opacity-60"
                     style={{ backgroundColor: accentColor }}
@@ -153,7 +153,7 @@ export default function Sidebar({
                   <TouchableOpacity
                     key={item.path}
                     className="flex-row items-center py-2.5 rounded-xl mb-1"
-                    style={{ 
+                    style={{
                       backgroundColor: isActive ? accentBg : 'transparent',
                       paddingHorizontal: open ? 14 : 0,
                       justifyContent: open ? 'flex-start' : 'center',
@@ -193,7 +193,7 @@ export default function Sidebar({
           </View>
 
           {/* ── Logout ── */}
-          <View 
+          <View
             style={{ paddingHorizontal: open ? 16 : 0, borderTopWidth: 1, borderTopColor: '#f3f4f6' }}
             className="pt-4"
           >
@@ -289,7 +289,7 @@ export default function Sidebar({
                         <Image source={require('../assets/selasar_logo.png')} style={{ width: 36, height: 36 }} resizeMode="contain" />
                       </View>
                       <View>
-                        <Text className="text-base font-bold text-gray-900">Selasar Kafe</Text>
+                        <Text className="text-base font-bold text-gray-900">Cici</Text>
                         <Text className="text-xs text-gray-400">{roleLabel}</Text>
                       </View>
                     </View>
