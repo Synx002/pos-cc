@@ -1,8 +1,8 @@
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
-const DEFAULT_NAME = 'Selasar Kafe';
-const DEFAULT_ADDR = 'Jl. Raya No. 123, Bandung';
+const DEFAULT_NAME = 'pos-cc';
+const DEFAULT_ADDR = 'Jl. Kaliwidas no 2';
 const ACCENT = '#C8576A';
 
 export type StoreInfoForReceipt = {

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Selasar Kafe",
-    "slug": "selasar-kafe",
-    "scheme": "selasarkafe",
+    "name": "pos-cc",
+    "slug": "pos-cc",
+    "scheme": "pos-cc",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",

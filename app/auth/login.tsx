@@ -45,7 +45,7 @@ export default function LoginScreen() {
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.appName}>Selasar Kafe</Text>
+          <Text style={styles.appName}>CC</Text>
           <Text style={styles.appSub}>Point of Sale</Text>
         </View>
 

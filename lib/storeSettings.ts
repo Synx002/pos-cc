@@ -15,8 +15,8 @@ export type StoreInfo = {
 };
 
 const DEFAULT: StoreInfo = {
-  store_name: 'Selasar Kafe',
-  store_address: 'Jl. Raya No. 123, Bandung',
+  store_name: 'pos-cc',
+  store_address: 'Jl. Kaliwidas no 2',
   store_phone: '',
 };
 

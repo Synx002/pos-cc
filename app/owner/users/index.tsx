@@ -18,14 +18,14 @@ import { Text, ActivityIndicator, Surface } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '../../../lib/supabase';
 
-const ACCENT       = '#E597A0';
+const ACCENT = '#E597A0';
 const ACCENT_LIGHT = '#FDF2F4';
-const DOMAIN       = '@selasarkafe.com';
+const DOMAIN = '@pos-cc.com';
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  owner:    { label: 'Pemilik',        color: '#7C3AED', bg: '#F5F3FF', icon: 'verified-user' },
-  cashier:  { label: 'Kasir',          color: '#0284C7', bg: '#F0F9FF', icon: 'point-of-sale' },
-  storeman: { label: 'Pengelola Toko', color: '#059669', bg: '#ECFDF5', icon: 'storefront'    },
+  owner: { label: 'Pemilik', color: '#7C3AED', bg: '#F5F3FF', icon: 'verified-user' },
+  cashier: { label: 'Kasir', color: '#0284C7', bg: '#F0F9FF', icon: 'point-of-sale' },
+  storeman: { label: 'Pengelola Toko', color: '#059669', bg: '#ECFDF5', icon: 'storefront' },
 };
 
 interface UserProfile {
@@ -46,7 +46,7 @@ const callAdminFn = async (body: Record<string, any>) => {
     try {
       const errBody = await (error as any).context?.json?.();
       if (errBody?.error) message = errBody.error;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
   if (data?.error) throw new Error(data.error);
@@ -61,28 +61,28 @@ export default function OwnerUsersScreen() {
   const { width } = useWindowDimensions();
   const isPhone = width < PHONE_BREAKPOINT;
 
-  const [users, setUsers]           = useState<UserProfile[]>([]);
-  const [loading, setLoading]       = useState(true);
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [saving, setSaving]         = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // ── Filter ───────────────────────────────────────────────────────────────
   const [filterRole, setFilterRole] = useState<string>('all');
 
   // ── Edit modal ───────────────────────────────────────────────────────────
-  const [editVisible, setEditVisible]   = useState(false);
-  const [editUser, setEditUser]         = useState<UserProfile | null>(null);
+  const [editVisible, setEditVisible] = useState(false);
+  const [editUser, setEditUser] = useState<UserProfile | null>(null);
   const [editUsername, setEditUsername] = useState('');
-  const [editRole, setEditRole]         = useState('cashier');
+  const [editRole, setEditRole] = useState('cashier');
   const [editPassword, setEditPassword] = useState('');
-  const [showEditPwd, setShowEditPwd]   = useState(false);
+  const [showEditPwd, setShowEditPwd] = useState(false);
 
   // ── Create modal ─────────────────────────────────────────────────────────
   const [createVisible, setCreateVisible] = useState(false);
-  const [newUsername, setNewUsername]     = useState('');
-  const [newRole, setNewRole]             = useState('cashier');
-  const [newPassword, setNewPassword]     = useState('');
-  const [showNewPwd, setShowNewPwd]       = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [newRole, setNewRole] = useState('cashier');
+  const [newPassword, setNewPassword] = useState('');
+  const [showNewPwd, setShowNewPwd] = useState(false);
 
   // ── Fetch ────────────────────────────────────────────────────────────────
   const fetchUsers = useCallback(async () => {
@@ -207,8 +207,8 @@ export default function OwnerUsersScreen() {
   };
 
   // ── Helpers ──────────────────────────────────────────────────────────────
-  const filtered    = filterRole === 'all' ? users : users.filter((u) => u.role === filterRole);
-  const roleCounts  = users.reduce<Record<string, number>>((acc, u) => {
+  const filtered = filterRole === 'all' ? users : users.filter((u) => u.role === filterRole);
+  const roleCounts = users.reduce<Record<string, number>>((acc, u) => {
     acc[u.role] = (acc[u.role] || 0) + 1;
     return acc;
   }, {});
@@ -242,8 +242,8 @@ export default function OwnerUsersScreen() {
 
   // ── Render item ──────────────────────────────────────────────────────────
   const renderUser = ({ item }: { item: UserProfile }) => {
-    const cfg      = ROLE_CONFIG[item.role] || { label: item.role, color: '#6B7280', bg: '#F9FAFB', icon: 'person' };
-    const name     = displayName(item.user_name);
+    const cfg = ROLE_CONFIG[item.role] || { label: item.role, color: '#6B7280', bg: '#F9FAFB', icon: 'person' };
+    const name = displayName(item.user_name);
     const initials = (name[0] || '?').toUpperCase();
 
     return (
@@ -532,7 +532,7 @@ const s = StyleSheet.create({
     paddingTop: 16, paddingBottom: 16,
   },
   headerSub: { fontSize: 11, color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.8 },
-  heading:   { fontSize: 22, fontWeight: '800', color: '#111827', marginTop: 2 },
+  heading: { fontSize: 22, fontWeight: '800', color: '#111827', marginTop: 2 },
   totalBadge: { backgroundColor: ACCENT_LIGHT, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   totalBadgeText: { fontSize: 12, fontWeight: '700', color: ACCENT },
   addBtn: {
@@ -547,7 +547,7 @@ const s = StyleSheet.create({
     flex: 1, elevation: 0, borderRadius: 16, backgroundColor: '#fff',
     borderWidth: 1, borderColor: '#F0F0F0', padding: 12, alignItems: 'center',
   },
-  statIcon:  { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+  statIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   statCount: { fontSize: 20, fontWeight: '800', color: '#111827' },
   statLabel: { fontSize: 10, color: '#9CA3AF', fontWeight: '600', textAlign: 'center', marginTop: 2 },
 
@@ -557,7 +557,7 @@ const s = StyleSheet.create({
     backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#E5E7EB',
   },
   filterChipActive: { backgroundColor: ACCENT, borderColor: ACCENT },
-  filterText:       { fontSize: 12, fontWeight: '600', color: '#6B7280' },
+  filterText: { fontSize: 12, fontWeight: '600', color: '#6B7280' },
   filterTextActive: { color: '#fff' },
   listLabel: { fontSize: 12, color: '#9CA3AF', fontWeight: '600', marginBottom: 8 },
 
@@ -566,9 +566,9 @@ const s = StyleSheet.create({
     elevation: 0, borderRadius: 18, backgroundColor: '#fff',
     borderWidth: 1, borderColor: '#F0F0F0', padding: 14,
   },
-  avatar:    { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  avatar: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   avatarText: { fontSize: 19, fontWeight: '800' },
-  userName:  { fontSize: 14, fontWeight: '700', color: '#111827' },
+  userName: { fontSize: 14, fontWeight: '700', color: '#111827' },
   userEmail: { fontSize: 11, color: '#9CA3AF', marginTop: 1 },
   roleBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -580,7 +580,7 @@ const s = StyleSheet.create({
     alignSelf: 'flex-start', marginTop: 4,
   },
   roleText: { fontSize: 10.5, fontWeight: '700' },
-  actions:  { flexDirection: 'row', gap: 6, flexShrink: 0 },
+  actions: { flexDirection: 'row', gap: 6, flexShrink: 0 },
   actionBtn: {
     width: 34, height: 34, borderRadius: 10,
     backgroundColor: '#F9FAFB', justifyContent: 'center', alignItems: 'center',
@@ -595,7 +595,7 @@ const s = StyleSheet.create({
     elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.2, shadowRadius: 6,
   },
 
-  empty:     { alignItems: 'center', paddingTop: 60 },
+  empty: { alignItems: 'center', paddingTop: 60 },
   emptyText: { color: '#9CA3AF', marginTop: 12, fontSize: 14 },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
@@ -605,15 +605,15 @@ const s = StyleSheet.create({
   },
   sheetHandle: { width: 40, height: 4, backgroundColor: '#E5E7EB', borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
-  sheetTitle:  { fontSize: 18, fontWeight: '800', color: '#111827' },
-  sheetSub:    { fontSize: 12, color: '#9CA3AF', marginTop: 3 },
+  sheetTitle: { fontSize: 18, fontWeight: '800', color: '#111827' },
+  sheetSub: { fontSize: 12, color: '#9CA3AF', marginTop: 3 },
   closeBtn: {
     width: 34, height: 34, borderRadius: 10, backgroundColor: '#F5F5F5',
     justifyContent: 'center', alignItems: 'center',
   },
 
-  fieldLabel:         { fontSize: 12, fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8 },
-  fieldLabelNote:     { fontSize: 10, fontWeight: '400', textTransform: 'none', color: '#9CA3AF', letterSpacing: 0 },
+  fieldLabel: { fontSize: 12, fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8 },
+  fieldLabelNote: { fontSize: 10, fontWeight: '400', textTransform: 'none', color: '#9CA3AF', letterSpacing: 0 },
   fieldLabelRequired: { color: '#EF4444', textTransform: 'none', letterSpacing: 0 },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
@@ -621,7 +621,7 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: '#E5E7EB',
     paddingHorizontal: 14, paddingVertical: 12, marginBottom: 16,
   },
-  input:      { flex: 1, fontSize: 14, color: '#111827', fontWeight: '500' },
+  input: { flex: 1, fontSize: 14, color: '#111827', fontWeight: '500' },
   domainHint: { fontSize: 12, color: '#9CA3AF', fontWeight: '500' },
 
   roleGrid: { flexDirection: 'row', gap: 8, marginBottom: 20 },

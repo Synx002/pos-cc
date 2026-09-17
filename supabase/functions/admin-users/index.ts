@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const DOMAIN = '@selasarkafe.com';
+const DOMAIN = '@pos-cc';
 
 /** Pastikan username berbentuk email valid */
 function toEmail(username: string): string {

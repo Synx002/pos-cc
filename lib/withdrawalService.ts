@@ -73,17 +73,26 @@ export async function getWithdrawalsForPeriod(
 ): Promise<TenantWithdrawal[]> {
   const startStr = format(startOfDay(periodStart), 'yyyy-MM-dd');
   const endStr = format(endOfDay(periodEnd), 'yyyy-MM-dd');
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('tenant_withdrawals')
     .select('*')
     .eq('tenant_id', Number(tenantId))
     .eq('period_start', startStr)
     .eq('period_end', endStr)
     .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('getWithdrawalsForPeriod error:', error.message);
+    return [];
+  }
   return (data || []) as TenantWithdrawal[];
 }
 
-/** Ambil atau buat record withdrawal. Jika ada transaksi baru setelah periode sudah dibayar, buat record BARU (history bertambah). */
+/** 
+ * Ambil atau buat record withdrawal:
+ * 1. Jika ada record pending, perbarui nominalnya (amount) sesuai transaksi terbaru.
+ * 2. Jika sudah ada record 'withdrawn' dan ada transaksi baru di periode yang sama, buat record pending baru untuk selisihnya.
+ */
 export async function getOrCreateWithdrawal(
   tenantId: string | number,
   periodStart: Date,
@@ -95,15 +104,52 @@ export async function getOrCreateWithdrawal(
   const periodType = getPeriodTypeForRange(periodStart, periodEnd);
 
   const existing = await getWithdrawalsForPeriod(tenantId, periodStart, periodEnd);
-  const totalRecorded = existing.reduce((sum, w) => {
-    if (w.status === 'withdrawn') return sum + (w.withdrawn_amount ?? w.amount ?? 0);
-    return sum + (w.amount || 0);
-  }, 0);
 
-  const delta = Math.max(0, amount - totalRecorded);
-  if (delta <= 0) {
-    const pending = existing.find((w) => w.status === 'pending');
-    return pending || existing[existing.length - 1] || null;
+  // Total yang sudah ditandai diambil ('withdrawn') pada periode ini
+  const withdrawnTotal = existing
+    .filter((w) => w.status === 'withdrawn')
+    .reduce((sum, w) => sum + (w.withdrawn_amount ?? w.amount ?? 0), 0);
+
+  // Sisa nominal yang berhak ditarik
+  const remainingDue = Math.max(0, amount - withdrawnTotal);
+
+  // Cek apakah sudah ada record yang masih berstatus pending
+  const pendingRecord = existing.find((w) => w.status === 'pending');
+
+  if (pendingRecord) {
+    // Jika nominal pending berbeda dengan sisa tagihan, update record yang ada
+    if (pendingRecord.amount !== remainingDue) {
+      const { data: updated, error } = await supabase
+        .from('tenant_withdrawals')
+        .update({
+          amount: remainingDue,
+          updated_at: new Date().toISOString(),
+          withdrawn_by: null, // <-- Pastikan tetap null saat pending
+          withdrawn_at: null,
+        })
+        .eq('id', pendingRecord.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('getOrCreateWithdrawal update error:', error.message);
+        return pendingRecord;
+      }
+      return updated as TenantWithdrawal;
+    }
+    return pendingRecord;
+  }
+
+  // Jika tidak ada record pending dan sisa tagihan <= 0, tidak perlu buat baru
+  if (remainingDue <= 0) {
+    return existing[existing.length - 1] || null;
+  }
+
+  // Pastikan user terautentikasi sebelum melakukan INSERT
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    console.warn('getOrCreateWithdrawal ditunda: User belum terautentikasi.');
+    return null;
   }
 
   const { data: created, error } = await supabase
@@ -113,14 +159,19 @@ export async function getOrCreateWithdrawal(
       period_type: periodType,
       period_start: startStr,
       period_end: endStr,
-      amount: delta,
+      amount: remainingDue,
       status: 'pending',
+      withdrawn_by: null,      // <-- EKSPLISIT NULL agar tidak terkena default yang salah
+      withdrawn_at: null,      // <-- EKSPLISIT NULL
+      withdrawn_amount: null,
+      notes: null,
     })
     .select()
     .single();
 
+
   if (error) {
-    console.error('getOrCreateWithdrawal error:', error);
+    console.error('getOrCreateWithdrawal error:', error.message);
     return null;
   }
   return created as TenantWithdrawal;
@@ -131,25 +182,34 @@ export async function markWithdrawn(
   withdrawalId: string,
   userId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const { data: row } = await supabase
-    .from('tenant_withdrawals')
-    .select('amount')
-    .eq('id', withdrawalId)
-    .single();
-  const amountToLock = row?.amount ?? 0;
+  try {
+    const { data: row, error: fetchError } = await supabase
+      .from('tenant_withdrawals')
+      .select('amount')
+      .eq('id', withdrawalId)
+      .single();
 
-  const { error } = await supabase
-    .from('tenant_withdrawals')
-    .update({
-      status: 'withdrawn',
-      withdrawn_at: new Date().toISOString(),
-      withdrawn_by: userId,
-      withdrawn_amount: amountToLock,
-    })
-    .eq('id', withdrawalId);
+    if (fetchError || !row) {
+      return { success: false, error: fetchError?.message || 'Data withdrawal tidak ditemukan' };
+    }
 
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+    const amountToLock = row.amount ?? 0;
+
+    const { error } = await supabase
+      .from('tenant_withdrawals')
+      .update({
+        status: 'withdrawn',
+        withdrawn_at: new Date().toISOString(),
+        withdrawn_by: userId,
+        withdrawn_amount: amountToLock,
+      })
+      .eq('id', withdrawalId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Terjadi kesalahan sistem' };
+  }
 }
 
 export interface WithdrawalWithUser extends TenantWithdrawal {
@@ -160,29 +220,43 @@ export interface WithdrawalWithUser extends TenantWithdrawal {
 export async function getWithdrawalHistory(
   tenantId: string | number
 ): Promise<WithdrawalWithUser[]> {
-  const { data } = await supabase
-    .from('tenant_withdrawals')
-    .select('*')
-    .eq('tenant_id', Number(tenantId))
-    .order('period_start', { ascending: false });
-  const rows = (data || []) as TenantWithdrawal[];
-  const userIds = [...new Set(rows.map((r) => r.withdrawn_by).filter(Boolean))] as string[];
-  let nameMap: Record<string, string> = {};
-  if (userIds.length > 0) {
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, user_name')
-      .in('id', userIds);
-    nameMap = (profiles || []).reduce((acc, p) => ({ ...acc, [p.id]: p.user_name || 'User' }), {});
+  try {
+    const { data, error } = await supabase
+      .from('tenant_withdrawals')
+      .select('*')
+      .eq('tenant_id', Number(tenantId))
+      .order('period_start', { ascending: false });
+
+    if (error) {
+      console.error('getWithdrawalHistory error:', error.message);
+      return [];
+    }
+
+    const rows = (data || []) as TenantWithdrawal[];
+    const userIds = [...new Set(rows.map((r) => r.withdrawn_by).filter(Boolean))] as string[];
+    let nameMap: Record<string, string> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, user_name')
+        .in('id', userIds);
+      nameMap = (profiles || []).reduce((acc, p) => ({ ...acc, [p.id]: p.user_name || 'User' }), {});
+    }
+    return rows.map((r) => ({
+      ...r,
+      withdrawn_by_name: r.withdrawn_by ? nameMap[r.withdrawn_by] || null : null,
+    }));
+  } catch (err: any) {
+    console.error('getWithdrawalHistory error:', err);
+    return [];
   }
-  return rows.map((r) => ({
-    ...r,
-    withdrawn_by_name: r.withdrawn_by ? nameMap[r.withdrawn_by] || null : null,
-  }));
 }
 
 /** Sync withdrawal records — dipanggil saat TenantsPage load/refresh agar "belum dibayar" selalu terupdate tanpa harus buka detail tenant */
 export async function syncWithdrawalsForCurrentWeek(): Promise<void> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
   const now = new Date();
   const weeksToSync = 4;
   for (let i = 0; i < weeksToSync; i++) {
@@ -192,21 +266,27 @@ export async function syncWithdrawalsForCurrentWeek(): Promise<void> {
     const fromDate = startOfDay(weekStart).toISOString();
     const toDate = endOfDay(weekEnd).toISOString();
 
-    const { data: details } = await supabase
+    const { data: details, error: detailsError } = await supabase
       .from('transaction_details')
       .select('quantity, products!inner(tenant_id, purchase_price), transactions!inner(created_at, transaction_status)')
       .eq('transactions.transaction_status', 'completed')
       .gte('transactions.created_at', fromDate)
       .lte('transactions.created_at', toDate);
 
+    if (detailsError) {
+      console.error('syncWithdrawals query error:', detailsError.message);
+      continue;
+    }
+
     if (!details?.length) continue;
 
     const payoutByTenant = new Map<number, number>();
     for (const row of details) {
-      const tenantId = row.products?.tenant_id;
+      const productObj = Array.isArray(row.products) ? row.products[0] : row.products;
+      const tenantId = productObj?.tenant_id;
       if (tenantId == null) continue;
       const qty = row.quantity || 0;
-      const purchasePrice = row.products?.purchase_price || 0;
+      const purchasePrice = productObj?.purchase_price || 0;
       const amount = qty * purchasePrice;
       payoutByTenant.set(tenantId, (payoutByTenant.get(tenantId) || 0) + amount);
     }
@@ -218,7 +298,7 @@ export async function syncWithdrawalsForCurrentWeek(): Promise<void> {
   }
 }
 
-/** Ambil record pending untuk periode (untuk tombol tandai). Bisa ada banyak record per periode. */
+/** Ambil record pending untuk periode (untuk tombol tandai). */
 export async function getWithdrawalForPeriod(
   tenantId: string | number,
   periodStart: Date,
@@ -226,5 +306,5 @@ export async function getWithdrawalForPeriod(
 ): Promise<TenantWithdrawal | null> {
   const all = await getWithdrawalsForPeriod(tenantId, periodStart, periodEnd);
   const pending = all.filter((w) => w.status === 'pending');
-  return pending[pending.length - 1] || null;
+  return pending[pending.length - 1] || all[all.length - 1] || null;
 }
