@@ -12,29 +12,39 @@ interface AuthState {
   fetchProfile: () => Promise<void>;
 }
 
+let isInitializing = false;
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   loading: true,
 
   initialize: async () => {
+    if (isInitializing) return;
+    isInitializing = true;
+
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        set({ user: session.user });
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        // Refresh token is expired, revoked, or invalid on Supabase
+        console.warn('Session error, clearing stale auth data:', error.message);
+        await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+        set({ user: null, profile: null, loading: false });
+        return;
+      }
+
+      if (data?.session?.user) {
+        set({ user: data.session.user });
         await get().fetchProfile();
       } else {
-        set({ loading: false });
+        set({ user: null, profile: null, loading: false });
       }
     } catch (error: any) {
-      const isInvalidRefreshToken =
-        error?.message?.includes('refresh token') ||
-        error?.name === 'AuthApiError';
-      if (isInvalidRefreshToken) {
-        await supabase.auth.signOut();
-      }
       console.error('Auth init error:', error);
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
       set({ user: null, profile: null, loading: false });
+    } finally {
+      isInitializing = false;
     }
   },
 
@@ -50,22 +60,38 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
-    await supabase.auth.signOut();
-    set({ user: null, profile: null });
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn('Server signout failed, performing local signout:', e);
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+    } finally {
+      set({ user: null, profile: null, loading: false });
+    }
   },
 
   fetchProfile: async () => {
     try {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser?.id) {
-        set({ profile: null, loading: false });
+      const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
+      if (userError || !authUser?.id) {
+        if (
+          userError?.message?.includes('refresh token') ||
+          userError?.message?.includes('Refresh Token') ||
+          userError?.name === 'AuthApiError'
+        ) {
+          await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+        }
+        set({ profile: null, user: null, loading: false });
         return;
       }
-      const { data } = await supabase
+      const { data, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', authUser.id)
         .single();
+      if (profileError) {
+        console.warn('Fetch profile query error:', profileError.message);
+      }
       set({ profile: data ?? null, loading: false });
     } catch (e) {
       console.error('Fetch profile error:', e);

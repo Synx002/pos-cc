@@ -2,14 +2,9 @@
 import { Redirect } from 'expo-router';
 import { useAuthStore } from '../stores/authStore';
 import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
-import { useEffect } from 'react';
 
 export default function Index() {
-  const { user, profile, loading, initialize } = useAuthStore();
-
-  useEffect(() => {
-    initialize();
-  }, []);
+  const { user, profile, loading } = useAuthStore();
 
   // Tampil loading spinner saat cek session
   if (loading) {
